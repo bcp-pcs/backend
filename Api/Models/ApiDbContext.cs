@@ -10,5 +10,6 @@ namespace Api.Models
         }
 
         public DbSet<Applicant> Applicants { get; set; }
+        public DbSet<Mortgage> Mortgages { get; set; }
     }
 }
