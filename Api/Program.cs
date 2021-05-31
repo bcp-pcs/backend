@@ -13,6 +13,7 @@ namespace Api
     {
         public static void Main(string[] args)
         {
+            // TODO (like to have) Change logger
             CreateHostBuilder(args).Build().Run();
         }
 

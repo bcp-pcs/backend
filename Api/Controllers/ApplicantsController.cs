@@ -9,6 +9,8 @@ using Api.Models;
 
 namespace Api.Controllers
 {
+    // TODO (like to have) Wrap the scaffold generic CRUD logic into reusable base class
+    // TODO (like to have) Use Repositories
     [Route("api/[controller]")]
     [ApiController]
     public class ApplicantsController : ControllerBase
