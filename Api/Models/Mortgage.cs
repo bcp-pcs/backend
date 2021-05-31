@@ -14,6 +14,6 @@ namespace Api.Models
         [MaxLength(30)]
         public string InterestRateType { get; set; }
         
-        public float LVR { get; set; } // Loan to Value Ratio
+        public float LTV { get; set; } // Loan to Value
     }
 }

@@ -14,22 +14,29 @@ using Api.Models.DTOs.Requests;
 using Api.Models.DTOs.Responses;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Api.Models;
+using Microsoft.EntityFrameworkCore;
+using Api.Helper;
 
 namespace Api.Controllers
 {
+    // TODO (like to have) Add Refresh Tokens support
     [Route("api/[controller]")] // api/authManagement
     [ApiController]
     public class AuthManagementController : ControllerBase
     {
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ApiDbContext _context;
         private readonly JwtConfig _jwtConfig;
 
         public AuthManagementController(
             UserManager<IdentityUser> userManager,
-            IOptionsMonitor<JwtConfig> optionsMonitor)
+            IOptionsMonitor<JwtConfig> optionsMonitor,
+            ApiDbContext context)
         {
             _userManager = userManager;
             _jwtConfig = optionsMonitor.CurrentValue;
+            _context = context;
         }
 
         [HttpPost]
@@ -55,12 +62,15 @@ namespace Api.Controllers
                 var isCreated = await _userManager.CreateAsync(newUser, user.Password);
                 if(isCreated.Succeeded)
                 {
-                   var jwtToken =  GenerateJwtToken( newUser);
+                    _context.Applicants.Add(user);
+                    await _context.SaveChangesAsync();
 
-                   return Ok(new RegistrationResponse() {
-                       Success = true,
-                       Token = jwtToken
-                   });
+                    var jwtToken =  GenerateJwtToken(newUser);
+
+                    return Ok(new RegistrationResponse() {
+                        Success = true,
+                        Token = jwtToken
+                    });
                 } else {
                     return BadRequest(new RegistrationResponse(){
                             Errors = isCreated.Errors.Select(x => x.Description).ToList(),
@@ -119,6 +129,27 @@ namespace Api.Controllers
                     },
                     Success = false
             });
+        }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        [HttpGet("UserProfile")]
+        public async Task<ActionResult<Applicant>> GetUserProfile()
+        {
+            // // TODO (like to have) Link Applicant on register by Id
+            // var identity = HttpContext.User.Identity as ClaimsIdentity;
+            // var _email = identity.Claims.Where(c => c.Type == ClaimTypes.Email).Select(c => c.Value).SingleOrDefault();
+            // var applicant = await _context.Applicants.FirstAsync(x => x.Email == _email);
+            var applicant = await JwtHelper.GetLoginApplicant(
+                (ClaimsIdentity) HttpContext.User.Identity,
+                 _context
+                );
+
+            if (applicant == null)
+            {
+                return NotFound();
+            }
+
+            return applicant;
         }
 
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
