@@ -7,7 +7,7 @@ namespace Api.Helper {
                 int _age = DateTime.Today.Year - dayOfBirth.Year;
 
                 // -1 if not birthday yet
-                if (new DateTime(DateTime.Today.Year, dayOfBirth.Month, dayOfBirth.Day) < dayOfBirth) {
+                if (new DateTime(DateTime.Today.Year, dayOfBirth.Month, dayOfBirth.Day) > DateTime.Today) {
                     _age--;
                 }
 
