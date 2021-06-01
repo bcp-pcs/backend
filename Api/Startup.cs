@@ -32,6 +32,8 @@ namespace Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors();
+
             services.AddDbContext<ApiDbContext>(opt =>
                                                 opt.UseInMemoryDatabase("ApiDb"));
 
@@ -76,6 +78,11 @@ namespace Api
             // app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            // TODO (like to have) Enable configure
+            app.UseCors(
+                options => options.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader()
+            );
 
             app.UseAuthentication();
 
